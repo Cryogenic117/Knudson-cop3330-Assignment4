@@ -1,0 +1,65 @@
+@startuml
+class App {
+main()
+start()
+}
+class ListController {
+
+initialize()
+nextButtonClicked()
+previousButtonClicked()
+displayBoxListener()
+changeButtonClicked()
+deleteButtonClicked()
+deleteListButtonClicked()
+addButtonClicked()
+importButtonClicked()
+exportAllButtonClicked()
+exportButtonClicked()
+createListButtonClicked()
+changeDescriptionButtonClicked()
+ChangeNameButtonClicked()
+changeDateButtonClicked()
+
+}
+Class ListFunctions {
+editName()
+editDescription()
+editDateDue()
+addListItem()
+deleteListItem()
+}
+
+Class FileManagement {
+readFile()
+writeFile()
+}
+
+
+Class list {
+-name
+-size
+-items
+}
+
+Class item{
+-item_name
+-due-date
+-description
+}
+Class TempListMem {
+initialize()
+appendList()
+removeList()
+findList()
+}
+item <-- list
+javafx.application <|-- App
+App -- ListController
+ListController -- ListFunctions
+TempListMem -- item
+ListFunctions -- TempListMem
+ListFunctions -- item
+TempListMem -- list
+TempListMem -- FileManagement
+@enduml

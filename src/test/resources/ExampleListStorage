@@ -1,0 +1,6 @@
+1 (lists)
+Grocery (list String)
+3 (items)
+eggs(name) empty(due-date) empty(description)
+cheese empty empty
+milk empty empty
