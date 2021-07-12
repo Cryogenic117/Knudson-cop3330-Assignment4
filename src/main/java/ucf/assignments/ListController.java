@@ -8,95 +8,145 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.ChoiceBox;
-import javafx.stage.Modality;
-import javafx.stage.PopupWindow;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
-import java.io.IOException;
 
 public class ListController {
-    @FXML
-    ObservableList<String> displayBoxList = FXCollections.observableArrayList("All", "Incomplete", "Complete");
-    @FXML
-    // set up choice box
-    private ChoiceBox displayBox;
-    @FXML
-    private void initialize() {
+    public static ObservableList<Item> allList;
+
+    //Table
+    @FXML public TableView<Item> tableView;
+    @FXML public TableColumn<Item, String> itemNameColumn;
+    @FXML public TableColumn<Item, String> descriptionColumn;
+    @FXML public TableColumn<Item, String> dueDateColumn;
+    @FXML public TableColumn<Item, String> statusColumn;
+
+    // Choice box
+    @FXML ObservableList<String> displayBoxList = FXCollections.observableArrayList("All", "Incomplete", "Complete");
+    @FXML private ChoiceBox displayBox;
+
+    // Text field
+    @FXML public TextField filePathField;
+    @FXML public TextField fileNameField;
+
+    // Initializers
+    @FXML private void initialize() {
+        initializeDisplayBox();
+        initializeTable();
+    }
+    public void initializeDisplayBox() {
         displayBox.setValue("All");
         displayBox.setItems(displayBoxList);
+    }
+    public void initializeTable() {
+        // sets up table columns
+        itemNameColumn.setCellValueFactory(new PropertyValueFactory<Item, String>("itemName"));
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<Item, String>("description"));
+        dueDateColumn.setCellValueFactory(new PropertyValueFactory<Item, String>("dueDate"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<Item, String>("status"));
 
+        allList = ListFunctions.initialize();
+        refreshView();
+
+        //allow fields to be edited
+        tableView.setEditable(true);
+        itemNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        statusColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        dueDateColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+    }
+
+    public void refreshView() {
+        tableView.setItems(allList);
+    }
+
+    // Allows user to change display
+    public void changeDisplayType(ActionEvent actionEvent) {
+        if(displayBox.getValue().toString().compareTo("All") == 0) {
+            System.out.println("Display All");
+            refreshView();
+        }
+        else if(displayBox.getValue().toString().compareTo("Incomplete") == 0) {
+            System.out.println("Display Incomplete");
+            tableView.setItems(ListFunctions.displayIncomplete(allList));
+        }
+        else if(displayBox.getValue().toString().compareTo("Complete") == 0) {
+            System.out.println("Display Complete");
+            tableView.setItems(ListFunctions.displayComplete(allList));
+        }
+    }
+
+    //Change columns content with double click
+    public void changeItemNameEvent(CellEditEvent cell) {
+        Item itemSelected = tableView.getSelectionModel().getSelectedItem();
+        itemSelected.setItemName(cell.getNewValue().toString());
+    }
+    public void changeDescriptionNameEvent(CellEditEvent cell) {
+        Item itemSelected = tableView.getSelectionModel().getSelectedItem();
+        if(cell.getNewValue().toString().length() <= 256) {
+            itemSelected.setDescription(cell.getNewValue().toString());
+        }
+        else {
+            itemSelected.setDescription("Over character Limit");
+        }
+    }
+    public void changeStatusEvent(CellEditEvent cell) {
+        Item itemSelected = tableView.getSelectionModel().getSelectedItem();
+        if(cell.getNewValue().toString().toLowerCase().compareTo("complete") == 0) {
+            itemSelected.setStatus(cell.getNewValue().toString());
+            return;
+        }
+        else if(cell.getNewValue().toString().toLowerCase().compareTo("incomplete") == 0) {
+            itemSelected.setStatus(cell.getNewValue().toString());
+            return;
+        }
+            itemSelected.setStatus("Invalid");
+    }
+    public void changeDueDateEvent(CellEditEvent cell) {
+        Item itemSelected = tableView.getSelectionModel().getSelectedItem();
+
+        //verify entry using local date
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(cell.getNewValue().toString(), formatter);
+
+        itemSelected.setDueDate(date.toString());
     }
 
     // Button Functions
-    @FXML
-    public void nextButtonClicked(ActionEvent actionEvent) {
-        // getList(next)
-        // display next List on table
-    }
-    public void previousButtonClicked(ActionEvent actionEvent) {
-        // getList(previous)
-        //display previous list on table
-    }
-    void displayBoxListener() {
-        // if(displaybox is all) do nothing
-        // else if (display box = completed) show only completed items in list
-        // else if (display box = completed) show only uncompleted items in list
-    }
-    public void changeButtonClicked(ActionEvent actionEvent) {
-        //check namefield if empty continue else replace
-    }
-
     public void deleteButtonClicked(ActionEvent actionEvent) {
-        //get name in Name field if empty ignore input
-        // search for name in Map once found delete name
+        ListFunctions.deleteListItem(tableView.getSelectionModel().getSelectedItems(), allList);
+        // refreshes display according to display selection
+        changeDisplayType(actionEvent);
     }
-
-    public void deleteListButtonClicked(ActionEvent actionEvent) {
-        //delete entire list currently displayed
-    }
-
+    // creates new empty item
     public void addButtonClicked(ActionEvent actionEvent) {
-        //add list item if Name field isn't empty
-        // if any other field is empty default to "empty"
+        ListFunctions.addEmptyListItem(allList);
     }
-
+    // calls import function and then refreshes Display based on type
     public void importButtonClicked(ActionEvent actionEvent) {
-        //attempt to download external text file with correct format to list
-        // capable of importing as many lists as included in text file
-    }
+        FileManagement.importFile(filePathField.getCharacters().toString());
+        changeDisplayType(actionEvent);
 
-    public void exportAllButtonClicked(ActionEvent actionEvent) {
-        // will write all lists stored in ram to a text file and call write function for each list
     }
-
+    // exports to file using given name and path
     public void exportButtonClicked(ActionEvent actionEvent) {
-        //will export the currently displayed list
+        FileManagement.exportHandler(fileNameField, filePathField);
     }
-    public void createListButtonClicked(ActionEvent actionEvent) {
-        //reads list name field
-        // creates text file with data
-        // passes text file to create list function
-    }
-
-    public void changeDescriptionButtonClicked(ActionEvent actionEvent) {
-        // will take the name entered in namefield and if it matches a current entry then the description will change to what is in the description field
-    }
-
-    public void changeNameButtonClicked(ActionEvent actionEvent) {
-        // Will match name in name field with entry and replace with value in NewNameField
-    }
-
-    public void changeDateButtonClicked(ActionEvent actionEvent) {
-        // WIll match name with result and replace the date with the dateduefield
-    }
-
-
-    public void completeItemButtonPressed(ActionEvent actionEvent) {
-        // take in name field and mark corresponding item as complete
+    // assign display to new empty list
+    public void clearListButtonClicked(ActionEvent actionEvent) {
+        // Only allowed to be used when using all view
+        if(displayBox.getValue().toString().toLowerCase().compareTo("all") == 0) {
+            allList = FXCollections.observableArrayList();
+            refreshView();
+        }
     }
 }
 

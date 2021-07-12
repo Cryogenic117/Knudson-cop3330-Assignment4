@@ -6,60 +6,50 @@ start()
 class ListController {
 
 initialize()
-nextButtonClicked()
-previousButtonClicked()
-displayBoxListener()
-changeButtonClicked()
+initializeDisplayBox()
+initializeTable()
+refreshView()
+changeDisplayType()
+ChangeItemNameEvent()
+ChangeDescriptionEvent()
+ChangeStatusEvent()
+ChangeDueDateEvent()
 deleteButtonClicked()
-deleteListButtonClicked()
 addButtonClicked()
 importButtonClicked()
-exportAllButtonClicked()
 exportButtonClicked()
-createListButtonClicked()
-changeDescriptionButtonClicked()
-ChangeNameButtonClicked()
-changeDateButtonClicked()
+ClearListButtonClicked()
+
+
+
 
 }
 Class ListFunctions {
-editName()
-editDescription()
-editDateDue()
+initialize()
+displayComplete()
+displayIncomplete()
+addEmptyListItem()
 addListItem()
 deleteListItem()
 }
 
 Class FileManagement {
-readFile()
-writeFile()
+importHandler()
+import()
+export()
 }
 
-
-Class list {
--name
--size
--items
-}
 
 Class item{
 -item_name
--due-date
+-dueDate
 -description
+-status
 }
-Class TempListMem {
-initialize()
-appendList()
-removeList()
-findList()
-}
-item <-- list
+
 javafx.application <|-- App
-App -- ListController
+javafx.application -- ListController
 ListController -- ListFunctions
-TempListMem -- item
-ListFunctions -- TempListMem
-ListFunctions -- item
-TempListMem -- list
-TempListMem -- FileManagement
+ListController -- item
+ListController -- FileManagement
 @enduml

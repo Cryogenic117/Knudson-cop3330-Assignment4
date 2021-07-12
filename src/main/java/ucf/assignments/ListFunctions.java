@@ -4,23 +4,48 @@
  */
 package ucf.assignments;
 
-import java.util.Map;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class ListFunctions {
-
-    public static void editName(Map<String,list> map, String newName) {
-        // Will replace map String with new name
+    // Create New Observable List and add one empty item
+    public static ObservableList<Item> initialize() {
+        ObservableList<Item> items = FXCollections.observableArrayList();
+        addEmptyListItem(items);
+        return items;
     }
-    public static void editDescription(Map<String,list> map, String newDescription) {
-        // will replace item class description variable with new description
+    // Create new list with only "complete" status items
+    public static ObservableList<Item> displayComplete(ObservableList<Item> items) {
+        ObservableList<Item> completeList = FXCollections.observableArrayList();
+        for (Item item : items) {
+            if (item.getStatus().toLowerCase().compareTo("complete") == 0) {
+                completeList.add(item);
+            }
+        }
+        return completeList;
     }
-    public static void editDateDue(Map<String,list> map, String newDate) {
-        // will replace due date with new date
+    // Create new list with only "incomplete" status items
+    public static ObservableList<Item> displayIncomplete(ObservableList<Item> items) {
+        ObservableList<Item> incompleteList = FXCollections.observableArrayList();
+        for (Item item : items) {
+            if (item.getStatus().toLowerCase().compareTo("incomplete") == 0) {
+                incompleteList.add(item);
+            }
+        }
+        return incompleteList;
     }
-    public static void addListItem(Map<String,list> map, String name, String date, String description) {
-        // will add new item to existing list
+    // create list item with default values
+    public static void addEmptyListItem(ObservableList<Item> items) {
+        items.add(new Item("Enter Item name", "Enter up to 256 Characters", "Enter Complete or Incomplete", "YYYY-MM-DD"));
     }
-    public static void deleteListItem(Map<String,list> map, String name) {
-        // will delete the first item with a matching name
+    // Uses setters from item to convert strings to item
+    public static void addListItem(String item, String description, String dueDate, String status) {
+        ListController.allList.add(new Item(item, description, dueDate, status));
+    }
+    // Search All list for list of items selected to be deleted and delete if found
+    public static void deleteListItem(ObservableList<Item> selected, ObservableList<Item> list) {
+        for(Item item : selected) {
+            list.remove(item);
+        }
     }
 }
